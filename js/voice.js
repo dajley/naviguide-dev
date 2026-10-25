@@ -180,14 +180,8 @@ export function createVoice({
 				transcriber = new Moonshine.MicrophoneTranscriber(
 					MODEL_PATH,
 					{
-						onTranscriptionUpdated: (text) => {
-							console.log("updated:", text);
-							onStatus?.(`Hearing: ${text}`);
-						},
-						onTranscriptionCommitted: (text) => {
-							onStatus?.(`Heard: ${text}`);
-							handle(text);
-						},
+						onTranscriptionUpdated: (text) => console.log("updated:", text),
+						onTranscriptionCommitted: handle,
 					},
 					true,
 				);

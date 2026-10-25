@@ -299,14 +299,7 @@ setOnSpeak((text) => voice.noteSpeech(text));
 button.addEventListener("click", () => (running ? stopApp() : startApp()));
 
 // The first tap (on the intro screen) starts voice listening.
-document.addEventListener(
-	"pointerdown",
-	() => {
-		voice.listen();
-		keepAwake();
-	},
-	{ once: true },
-);
+document.addEventListener("pointerdown", () => voice.listen(), { once: true });
 
 // The answer model loads in the background after the intro, so it doesn't delay startup.
 startIntro(() => {
