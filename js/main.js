@@ -7,7 +7,7 @@ import { setOverlay, startDisplay, stopDisplay } from "./overlay.js";
 import { updateGeometry } from "./geometry.js";
 import { startIntro } from "./intro.js";
 import { createVoice } from "./voice.js";
-import { loadAnswerModel, isReady, interpretQuestion } from "./llm.js";
+import { loadAnswerModel, isReady, interpretQuestion } from "./embed.js";
 import { respond } from "./answers.js";
 
 // Spoken as a safety message while the phone is held sideways.

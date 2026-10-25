@@ -37,8 +37,7 @@ const SHELL_FILES = [
 	"./js/worker-core.js",
 	"./js/voice.js",
 	"./js/answers.js",
-	"./js/llm.js",
-	"./js/llm-worker.js",
+	"./js/embed.js",
 	"./icons/naviguide-icon-192.png",
 	"./icons/naviguide-icon-512.png",
 ];
@@ -57,6 +56,10 @@ const ASSET_FILES = [
 	"./js/vendor/moonshine/silero_vad_v5.onnx",
 	"./models/moonshine-base/quantized/decoder_model_merged.onnx",
 	"./models/moonshine-base/quantized/encoder_model.onnx",
+	"./models/all-MiniLM-L6-v2/config.json",
+	"./models/all-MiniLM-L6-v2/tokenizer.json",
+	"./models/all-MiniLM-L6-v2/tokenizer_config.json",
+	"./models/all-MiniLM-L6-v2/onnx/model_quantized.onnx",
 ];
 
 const ASSET_PATH = /\/(models|js\/vendor)\//;
