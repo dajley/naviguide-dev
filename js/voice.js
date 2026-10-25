@@ -1,7 +1,7 @@
 // Voice commands and questions, using Moonshine (offline speech recognition).
-// Commands are checked first, so a command heard with navigation speech still counts.
-// A question cue opens the question window when two of "navi," "have," or "question" are heard
-// in the same pickup, in any order.
+// Listening is paused until the intro's instructions finish (resume() is called then).
+// Start and stop work in any order. A question cue opens the question window when two of
+// "navi," "have," or "question" are heard in the same pickup, in any order.
 import * as Moonshine from "./vendor/moonshine/moonshine.min.js";
 
 const MODEL_PATH = "models/moonshine-base";
@@ -20,14 +20,15 @@ const CUE_MIN_GROUPS = 2; // how many of the three groups must be heard
 export function createVoice({
 	onStart,
 	onStop,
+	isRunning,
 	onQuestionOpen,
 	onRetry,
 	onQuestionTimeout,
 	onQuestion,
 	onStatus,
-	canRestart,
 }) {
 	let transcriber = null;
+	let paused = true; // true until the intro's instructions are finished
 	let inQuestion = false; // from the cue until answered or timed out
 	let questionOpen = false; // the 6-second window itself
 	let questionTimer = null;
@@ -121,6 +122,7 @@ export function createVoice({
 
 	function handle(text) {
 		console.log("committed:", text);
+		if (paused) return;
 		const list = words(text);
 		if (list.length === 0) return;
 
@@ -133,10 +135,10 @@ export function createVoice({
 			return;
 		}
 
-		// Start works in any order, only while the app is stopped.
-		// While it runs, the only "start" it hears is its own announcement, so that's ignored.
+		// Start works in any order whenever the app isn't running.
+		// Its own "Navigation started." is heard while running, so it's ignored.
 		if (
-			canRestart?.() &&
+			!isRunning?.() &&
 			list.includes("start") &&
 			list.includes("navigation")
 		) {
@@ -146,12 +148,6 @@ export function createVoice({
 
 		// The app's own speech is ignored from here on.
 		if (isRecentSpeech(list) || isEcho(list)) return;
-
-		// Start is unchanged: the exact phrase "Navi start navigation."
-		if (startsNavi && rest === "start navigation") {
-			onStart?.();
-			return;
-		}
 
 		// During a question, the next phrase is the question.
 		// Cues during a question are ignored, so a repeat can't reopen it.
@@ -172,6 +168,11 @@ export function createVoice({
 	return {
 		noteSpeech,
 
+		// Called when the intro's instructions are finished.
+		resume() {
+			paused = false;
+		},
+
 		async listen() {
 			if (transcriber) return;
 			try {
@@ -186,7 +187,7 @@ export function createVoice({
 				);
 				await transcriber.start();
 				onStatus?.(
-					'Voice on. Say "Navi, start navigation" or Press the Start button to begin.',
+					'Voice on. Say "Navi, start navigation" or press the Start button to begin.',
 				);
 			} catch (err) {
 				transcriber = null;

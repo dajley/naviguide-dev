@@ -25,7 +25,6 @@ let lastDets = [];
 let lastAlertText = "";
 let prevMeters = new Map();
 let stopRequested = false; // Set when "stop navigation" is said while the app is still loading.
-let hasStartedOnce = false;
 // The model worker and the request in flight, if any.
 let worker = null;
 let pending = null;
@@ -192,7 +191,6 @@ async function startApp() {
 		status.textContent = "Loading models…";
 		await loadModelsInWorker();
 		running = true;
-		hasStartedOnce = true;
 		loopId++;
 		button.textContent = "Stop";
 		if (stopRequested) {
@@ -251,7 +249,7 @@ const voice = createVoice({
 		setTimeout(() => setHold(false), 2000);
 	},
 	onQuestion: answerQuestion,
-	canRestart: () => hasStartedOnce && !running,
+	isRunning: () => running,
 });
 
 // Every spoken line is recorded, so the mic's echo of it can be dropped.
@@ -262,4 +260,4 @@ button.addEventListener("click", () => (running ? stopApp() : startApp()));
 // The first tap (on the intro screen) starts voice listening.
 document.addEventListener("pointerdown", () => voice.listen(), { once: true });
 
-startIntro();
+startIntro(() => voice.resume());
