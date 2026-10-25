@@ -4,7 +4,7 @@
 // "navi," "have," or "question" are heard in the same pickup, in any order.
 import * as Moonshine from "./vendor/moonshine/moonshine.min.js";
 
-const MODEL_PATH = "models/moonshine-base";
+const MODEL_PATH = "models/moonshine-tiny";
 const QUESTION_WINDOW_MS = 6000;
 const WINDOW_DELAY_MS = 1000; // gives the prompt's transcript time to arrive before the window opens
 const SPEECH_TAIL_MS = 3000; // the app's recent words are remembered this long
