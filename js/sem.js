@@ -107,6 +107,9 @@ export function analyzeSem(t, depthMap) {
 	const doorZ = { left: 0, center: 0, right: 0 };
 	const nDoorZ = { left: 0, center: 0, right: 0 };
 	const hDoorZ = { left: newHist(), center: newHist(), right: newHist() };
+	const hazardZ = { left: 0, center: 0, right: 0 };
+	const nHazardZ = { left: 0, center: 0, right: 0 };
+	const hHazardZ = { left: newHist(), center: newHist(), right: newHist() };
 
 	const structCounts = new Map();
 	const standCounts = new Map();
@@ -132,7 +135,9 @@ export function analyzeSem(t, depthMap) {
 				walk++;
 			} else if (HAZARD_IDS.has(id)) {
 				hazard++;
+				hazardZ[zone]++;
 				if (addDepth(hHazard, m)) nHazard++;
+				if (addDepth(hHazardZ[zone], m)) nHazardZ[zone]++;
 			} else if (DOOR_IDS.has(id)) {
 				door++;
 				doorZ[zone]++;
@@ -204,6 +209,14 @@ export function analyzeSem(t, depthMap) {
 		};
 	}
 
+	const hazardZones = {};
+	for (const z of ["left", "center", "right"]) {
+		hazardZones[z] = {
+			pct: pct(hazardZ[z], total),
+			m: nearest(hHazardZ[z], nHazardZ[z]),
+		};
+	}
+
 	return {
 		hazardPct: pct(hazard, total),
 		doorPct: pct(door, total),
@@ -213,6 +226,7 @@ export function analyzeSem(t, depthMap) {
 		wallM: nearest(hStruct, nStruct),
 		structName,
 		doorZones,
+		hazardZones,
 		bottomWalkZones: {
 			left: pct(bottom.left, bottomTotal),
 			center: pct(bottom.center, bottomTotal),
