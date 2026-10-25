@@ -10,7 +10,7 @@
 // the shell. When you change a model or a vendored library, bump ASSET_VERSION.
 
 const SHELL_VERSION = "v7";
-const ASSET_VERSION = "v4";
+const ASSET_VERSION = "v5";
 const SHELL_CACHE = `naviguide-shell-${SHELL_VERSION}`;
 const ASSET_CACHE = `naviguide-assets-${ASSET_VERSION}`;
 
@@ -53,6 +53,7 @@ const ASSET_FILES = [
 	"./js/vendor/moonshine/ort-wasm-simd-threaded.jsep.mjs",
 	"./js/vendor/moonshine/ort-wasm-simd-threaded.jsep.wasm",
 	"./js/vendor/moonshine/silero_vad_v5.onnx",
+	"./js/vendor/moonshine/vad.worklet.bundle.min.js",
 	"./models/moonshine-tiny/quantized/decoder_model_merged.onnx",
 	"./models/moonshine-tiny/quantized/encoder_model.onnx",
 	"./models/all-MiniLM-L6-v2/config.json",
