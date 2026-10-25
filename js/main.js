@@ -17,6 +17,24 @@ const video = document.getElementById("camera");
 const button = document.getElementById("toggle");
 const status = document.getElementById("status");
 
+// Keeps the screen on while the app is open, so the phone doesn't pause the mic.
+let wakeLock = null;
+
+async function keepAwake() {
+	try {
+		if (!("wakeLock" in navigator) || wakeLock) return;
+		wakeLock = await navigator.wakeLock.request("screen");
+		wakeLock.addEventListener("release", () => (wakeLock = null));
+	} catch (err) {
+		console.warn("wake lock failed:", err);
+	}
+}
+
+// The browser releases the wake lock when the page is hidden, so get it back when the page is shown again.
+document.addEventListener("visibilitychange", () => {
+	if (document.visibilityState === "visible") keepAwake();
+});
+
 let running = false;
 let loopId = 0;
 let busy = false;
@@ -281,7 +299,14 @@ setOnSpeak((text) => voice.noteSpeech(text));
 button.addEventListener("click", () => (running ? stopApp() : startApp()));
 
 // The first tap (on the intro screen) starts voice listening.
-document.addEventListener("pointerdown", () => voice.listen(), { once: true });
+document.addEventListener(
+	"pointerdown",
+	() => {
+		voice.listen();
+		keepAwake();
+	},
+	{ once: true },
+);
 
 // The answer model loads in the background after the intro, so it doesn't delay startup.
 startIntro(() => {
