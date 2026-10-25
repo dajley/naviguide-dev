@@ -2,7 +2,7 @@
 // Listening is paused until the intro's instructions finish (resume() is called then).
 // Start and stop work in any order. A question cue opens the question window when two of
 // "navi," "have," or "question" are heard in the same pickup, in any order.
-import * as Moonshine from "./vendor/moonshine/moonshine.min.js";
+import * as Moonshine from "../vendor/moonshine-tiny/moonshine.min.js";
 
 const MODEL_PATH = "models/moonshine-tiny";
 const QUESTION_WINDOW_MS = 6000;

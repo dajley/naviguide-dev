@@ -1,6 +1,6 @@
 // Web Worker that runs the models, so the main page stays free for the camera and overlay.
 // Classic worker: loads ONNX Runtime with importScripts, then the model code as a module.
-importScripts("./vendor/ort/ort.webgpu.min.js");
+importScripts("../vendor/yolo26n/ort.webgpu.min.js");
 
 let core = null;
 

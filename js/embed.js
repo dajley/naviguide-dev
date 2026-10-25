@@ -1,11 +1,8 @@
 // Matches a question to a kind of question and to a name in the scene, using a small embedding model.
 // The model only picks the closest match. Code writes every answer.
-import {
-	pipeline,
-	env,
-} from "https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.8.1/+esm";
+import { pipeline, env } from "../vendor/minilm/transformers.web.min.js";
 
-const MODEL_NAME = "all-MiniLM-L6-v2";
+const MODEL_NAME = "minilm";
 const KIND_MIN = 0.35; // below this, the question is not close enough to any kind
 const NAME_MIN = 0.5; // below this, no name in the scene fits the question
 
@@ -88,6 +85,10 @@ export async function loadAnswerModel(onProgress) {
 	if (extractor) return;
 	env.allowLocalModels = true;
 	env.allowRemoteModels = false;
+	env.backends.onnx.wasm.wasmPaths = new URL(
+		"../vendor/minilm/",
+		import.meta.url,
+	).href;
 	env.localModelPath = new URL("../models/", import.meta.url).href;
 	extractor = await pipeline("feature-extraction", MODEL_NAME, {
 		dtype: "q8",

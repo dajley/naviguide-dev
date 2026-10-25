@@ -63,7 +63,15 @@
 			}
 		</script>
 		<!-- ONNX Runtime is vendored locally so the app works offline. -->
-		<script src="js/vendor/ort/ort.webgpu.min.js"></script>
+		<script src="vendor/yolo26n/ort.webgpu.min.js"></script>
+		<script type="importmap">
+			{
+				"imports": {
+					"onnxruntime-web": "./vendor/minilm/ort.wasm.min.mjs",
+					"onnxruntime-common": "./vendor/minilm/ort.wasm.min.mjs"
+				}
+			}
+		</script>
 		<script type="module" src="js/main.js"></script>
 	</body>
 </html>

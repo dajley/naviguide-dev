@@ -38,10 +38,10 @@ async function webgpuAvailable() {
 // the CPU, because some phone GPUs return wrong floor and door results for it.
 export async function init(base) {
 	// The worker can't find the ONNX Runtime files on its own, so give the folder explicitly.
-	ort.env.wasm.wasmPaths = base + "js/vendor/ort/";
-	const segUrl = base + "models/yolo26n-seg.onnx";
-	const depthUrl = base + "models/yolo26n-depth.onnx";
-	const semUrl = base + "models/yolo26n-sem-ade20k.onnx";
+	ort.env.wasm.wasmPaths = base + "vendor/yolo26n/";
+	const segUrl = base + "models/yolo26n/yolo26n-seg.onnx";
+	const depthUrl = base + "models/yolo26n/yolo26n-depth.onnx";
+	const semUrl = base + "models/yolo26n/yolo26n-sem-ade20k.onnx";
 
 	let gpuOk = false;
 	if (!FORCE_CPU && (await webgpuAvailable())) {
