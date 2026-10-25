@@ -201,6 +201,12 @@ async function startApp() {
 		}
 		say("Navigation started.");
 		loop(loopId);
+		// Load the answer model after navigation is running, so it doesn't compete with voice and the camera models.
+		setTimeout(() => {
+			loadAnswerModel((text) => console.log("model:", text)).catch((err) =>
+				console.warn("answer model failed to load:", err),
+			);
+		}, 3000);
 	} catch (err) {
 		status.textContent = `Error: ${err.name}. ${err.message}`;
 	} finally {
@@ -280,7 +286,4 @@ document.addEventListener("pointerdown", () => voice.listen(), { once: true });
 // The answer model loads in the background after the intro, so it doesn't delay startup.
 startIntro(() => {
 	voice.resume();
-	loadAnswerModel((text) => console.log("model:", text)).catch((err) =>
-		console.warn("answer model failed to load:", err),
-	);
 });

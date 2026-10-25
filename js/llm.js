@@ -1,6 +1,7 @@
 // Labels a question's kind and picks its topic from the camera's list, using Qwen2.5 through WebLLM.
 // The model never answers the question. Code writes the answer from the facts.
-import { CreateWebWorkerMLCEngine } from "https://cdn.jsdelivr.net/npm/@mlc-ai/web-llm@0.2.85/+esm";
+// The WebLLM library is vendored in js/vendor/webllm so the app works offline.
+// It loads only when the model is first needed, so it doesn't slow down the voice startup.
 
 const MODEL_ID = "Qwen2.5-0.5B-Instruct-q4f16_1-MLC";
 
@@ -27,8 +28,10 @@ export function isReady() {
 }
 
 // Downloads and loads the model the first time. Later calls do nothing.
+// The model weights are kept in the browser's cache, so after one online load the app works offline.
 export async function loadAnswerModel(onProgress) {
 	if (engine) return;
+	const { CreateWebWorkerMLCEngine } = await import("./vendor/webllm/index.js");
 	const worker = new Worker(new URL("./llm-worker.js", import.meta.url), {
 		type: "module",
 	});
