@@ -244,6 +244,7 @@ function stopApp() {
 	button.textContent = "Start";
 	status.textContent = "Camera off.";
 	cancelSpeech(); // Stop any navigation alert still being spoken.
+	resetAlerts(); // Drop any alert still waiting, so it can't speak after the stop.
 	// Give the browser a moment to clear the cancelled alert before speaking again.
 	setTimeout(() => say("Navigation stopped."), 400);
 }
@@ -274,6 +275,8 @@ async function answerQuestion(question) {
 	}
 }
 
+let introDone = false;
+let voiceReadyPending = false;
 const voice = createVoice({
 	onStart: startApp,
 	onStop: stopApp,
@@ -290,6 +293,10 @@ const voice = createVoice({
 		setTimeout(() => setHold(false), 2000);
 	},
 	onQuestion: answerQuestion,
+	onReady: () => {
+		if (introDone) say("Voice ready.");
+		else voiceReadyPending = true;
+	},
 	isRunning: () => running,
 });
 
@@ -299,9 +306,18 @@ setOnSpeak((text) => voice.noteSpeech(text));
 button.addEventListener("click", () => (running ? stopApp() : startApp()));
 
 // The first tap (on the intro screen) starts voice listening.
-document.addEventListener("pointerdown", () => voice.listen(), { once: true });
+document.addEventListener(
+	"pointerdown",
+	() => {
+		voice.listen();
+		keepAwake();
+	},
+	{ once: true },
+);
 
 // The answer model loads in the background after the intro, so it doesn't delay startup.
 startIntro(() => {
+	introDone = true;
 	voice.resume();
+	if (voiceReadyPending) say("Voice ready.");
 });

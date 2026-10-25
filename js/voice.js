@@ -26,6 +26,7 @@ export function createVoice({
 	onQuestionTimeout,
 	onQuestion,
 	onStatus,
+	onReady,
 }) {
 	let transcriber = null;
 	let paused = true; // true until the intro's instructions are finished
@@ -189,6 +190,7 @@ export function createVoice({
 				onStatus?.(
 					'Voice on. Say "Navi, start navigation" or press the Start button to begin.',
 				);
+				onReady?.();
 			} catch (err) {
 				transcriber = null;
 				onStatus?.(`Voice unavailable: ${err.message}`);

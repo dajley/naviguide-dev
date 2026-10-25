@@ -9,7 +9,7 @@
 // When you change app files, bump SHELL_VERSION so the install step re-caches
 // the shell. When you change a model or a vendored library, bump ASSET_VERSION.
 
-const SHELL_VERSION = "v6";
+const SHELL_VERSION = "v7";
 const ASSET_VERSION = "v4";
 const SHELL_CACHE = `naviguide-shell-${SHELL_VERSION}`;
 const ASSET_CACHE = `naviguide-assets-${ASSET_VERSION}`;
