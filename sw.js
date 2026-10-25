@@ -9,8 +9,8 @@
 // When you change app files, bump SHELL_VERSION so the install step re-caches
 // the shell. When you change a model or a vendored library, bump ASSET_VERSION.
 
-const SHELL_VERSION = "v3";
-const ASSET_VERSION = "v3";
+const SHELL_VERSION = "v4";
+const ASSET_VERSION = "v4";
 const SHELL_CACHE = `naviguide-shell-${SHELL_VERSION}`;
 const ASSET_CACHE = `naviguide-assets-${ASSET_VERSION}`;
 
@@ -46,7 +46,6 @@ const ASSET_FILES = [
 	"./js/vendor/ort/ort.webgpu.min.js",
 	"./js/vendor/ort/ort-wasm-simd-threaded.jsep.mjs",
 	"./js/vendor/ort/ort-wasm-simd-threaded.jsep.wasm",
-	"./js/vendor/webllm/index.js",
 	"./models/yolo26n-seg.onnx",
 	"./models/yolo26n-depth.onnx",
 	"./models/yolo26n-sem-ade20k.onnx",
