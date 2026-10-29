@@ -22,12 +22,9 @@
 				alt=""
 				aria-hidden="true"
 			/>
-			<div id="welcome" class="intro-welcome" hidden>
-				<h1>Welcome to NaViGuide</h1>
-				<p>
-					Instructions may lag by a few seconds. <br />
-					Say "start navigation" or press Start to begin.
-				</p>
+			<div id="screen" class="intro-welcome" hidden>
+				<h1 id="screen-title"></h1>
+				<p id="screen-text"></p>
 			</div>
 			<button id="begin" class="intro-begin" type="button">
 				Tap to continue
@@ -45,8 +42,8 @@
 				<canvas id="overlay" aria-hidden="true"></canvas>
 			</div>
 			<p id="status">
-				Instructions may lag by a few seconds. Say "start navigation" or press
-				Start to begin.
+				Instructions may lag by a few seconds. Say "Navi, start navigation" or
+				press Start to begin.
 			</p>
 			<button id="toggle" type="button">Start</button>
 		</main>

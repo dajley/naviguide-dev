@@ -3,6 +3,7 @@ let voice = null;
 let busy = false;
 let token = 0;
 let onFree = null;
+let onSpeak = null;
 let watchdog = null;
 
 function pickVoice() {
@@ -25,6 +26,11 @@ if (supported) {
 // Called by alerts.js when speech finishes, so a waiting message can be spoken.
 export function setOnFree(cb) {
 	onFree = cb;
+}
+
+// Called by voice.js so the mic's echo of each spoken line can be dropped.
+export function setOnSpeak(cb) {
+	onSpeak = cb;
 }
 
 // Marks speech as finished and lets the next message start.
@@ -67,7 +73,18 @@ function speakRaw(text) {
 		() => checkWatchdog(my, Date.now() + estimate),
 		estimate,
 	);
+	if (text.trim() && onSpeak) onSpeak(text);
 	speechSynthesis.speak(u);
+}
+
+// Stops anything being spoken right away and clears the busy flag, so the next line can start.
+// The cancelled utterance's end event is ignored because its token is out of date.
+export function cancelSpeech() {
+	if (!supported) return;
+	token++;
+	busy = false;
+	clearTimeout(watchdog);
+	speechSynthesis.cancel();
 }
 
 // Call once from the Start tap. Browsers only allow speech after a user gesture.

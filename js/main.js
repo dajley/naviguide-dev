@@ -1,7 +1,8 @@
 import { startCamera, stopCamera } from "./camera.js";
 import { decide, markApproaching, resetNavigation } from "./navigation.js";
-import { unlockSpeech, say } from "./speech.js";
-import { handleAlert, resetAlerts } from "./alerts.js";
+import { unlockSpeech, say, setOnSpeak, cancelSpeech } from "./speech.js";
+import { handleAlert, resetAlerts, setHold } from "./alerts.js";
+import { buildSceneJson } from "./scene.js";
 import { setOverlay, startDisplay, stopDisplay } from "./overlay.js";
 import { updateGeometry } from "./geometry.js";
 import { startIntro } from "./intro.js";
@@ -20,9 +21,10 @@ let busy = false;
 let needReset = false; // Tells the worker to start its ground state fresh.
 let lastGround = null;
 let lastSemMap = null;
+let lastDets = [];
+let lastAlertText = "";
 let prevMeters = new Map();
 let stopRequested = false; // Set when "stop navigation" is said while the app is still loading.
-
 // The model worker and the request in flight, if any.
 let worker = null;
 let pending = null;
@@ -144,6 +146,8 @@ async function inferOnce() {
 			};
 		}
 		handleAlert(alert);
+		lastDets = dets;
+		lastAlertText = alert.text;
 		setOverlay(lastSemMap, alert.focus);
 
 		console.log("timing", backend, r.timing);
@@ -213,20 +217,47 @@ function stopApp() {
 	stopDisplay();
 	button.textContent = "Start";
 	status.textContent = "Camera off.";
-	speechSynthesis.cancel(); // Stop any navigation alert still being spoken.
+	cancelSpeech(); // Stop any navigation alert still being spoken.
 	// Give the browser a moment to clear the cancelled alert before speaking again.
 	setTimeout(() => say("Navigation stopped."), 400);
+}
+
+// Answers from the scene at the moment the question was asked. The language model isn't connected yet.
+function answerQuestion(question) {
+	const scene = buildSceneJson(lastDets, lastGround, lastAlertText);
+	console.log("question:", question, scene);
+	const reply = scene
+		? "The question feature is not connected yet."
+		: "I don't have a camera reading yet.";
+	say(reply);
+	setTimeout(() => setHold(false), 1000 + reply.length * 80);
 }
 
 const voice = createVoice({
 	onStart: startApp,
 	onStop: stopApp,
 	onStatus: (text) => (status.textContent = text),
+	onQuestionOpen: () => {
+		setHold(true);
+		say("Yes?");
+	},
+	onRetry: () => {
+		say("Sorry, I didn't get that. Try again.");
+	},
+	onQuestionTimeout: () => {
+		say("Sorry, I still didn't get that.");
+		setTimeout(() => setHold(false), 2000);
+	},
+	onQuestion: answerQuestion,
+	isRunning: () => running,
 });
+
+// Every spoken line is recorded, so the mic's echo of it can be dropped.
+setOnSpeak((text) => voice.noteSpeech(text));
 
 button.addEventListener("click", () => (running ? stopApp() : startApp()));
 
 // The first tap (on the intro screen) starts voice listening.
 document.addEventListener("pointerdown", () => voice.listen(), { once: true });
 
-startIntro();
+startIntro(() => voice.resume());

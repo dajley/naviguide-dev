@@ -9,8 +9,8 @@
 // When you change app files, bump SHELL_VERSION so the install step re-caches
 // the shell. When you change a model or the vendored runtime, bump ASSET_VERSION.
 
-const SHELL_VERSION = "v1";
-const ASSET_VERSION = "v1";
+const SHELL_VERSION = "v2";
+const ASSET_VERSION = "v2";
 const SHELL_CACHE = `naviguide-shell-${SHELL_VERSION}`;
 const ASSET_CACHE = `naviguide-assets-${ASSET_VERSION}`;
 
@@ -30,6 +30,7 @@ const SHELL_FILES = [
 	"./js/intro.js",
 	"./js/navigation.js",
 	"./js/overlay.js",
+	"./js/scene.js",
 	"./js/sem.js",
 	"./js/speech.js",
 	"./js/worker.js",
@@ -46,6 +47,12 @@ const ASSET_FILES = [
 	"./models/yolo26n-seg.onnx",
 	"./models/yolo26n-depth.onnx",
 	"./models/yolo26n-sem-ade20k.onnx",
+	"./js/vendor/moonshine/moonshine.min.js",
+	"./js/vendor/moonshine/ort-wasm-simd-threaded.jsep.mjs",
+	"./js/vendor/moonshine/ort-wasm-simd-threaded.jsep.wasm",
+	"./js/vendor/moonshine/silero_vad_v5.onnx",
+	"./models/moonshine-base/quantized/decoder_model_merged.onnx",
+	"./models/moonshine-base/quantized/encoder_model.onnx",
 ];
 
 const ASSET_PATH = /\/(models|js\/vendor)\//;
