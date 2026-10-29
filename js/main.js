@@ -7,6 +7,8 @@ import { setOverlay, startDisplay, stopDisplay } from "./overlay.js";
 import { updateGeometry } from "./geometry.js";
 import { startIntro } from "./intro.js";
 import { createVoice } from "./voice.js";
+import { loadAnswerModel, isReady, interpretQuestion } from "./llm.js";
+import { respond } from "./answers.js";
 
 // Spoken as a safety message while the phone is held sideways.
 const UPRIGHT_MSG = "Hold your phone upright.";
@@ -199,6 +201,12 @@ async function startApp() {
 		}
 		say("Navigation started.");
 		loop(loopId);
+		// Load the answer model after navigation is running, so it doesn't compete with voice and the camera models.
+		setTimeout(() => {
+			loadAnswerModel((text) => console.log("model:", text)).catch((err) =>
+				console.warn("answer model failed to load:", err),
+			);
+		}, 3000);
 	} catch (err) {
 		status.textContent = `Error: ${err.name}. ${err.message}`;
 	} finally {
@@ -222,15 +230,30 @@ function stopApp() {
 	setTimeout(() => say("Navigation stopped."), 400);
 }
 
-// Answers from the scene at the moment the question was asked. The language model isn't connected yet.
-function answerQuestion(question) {
-	const scene = buildSceneJson(lastDets, lastGround, lastAlertText);
-	console.log("question:", question, scene);
-	const reply = scene
-		? "The question feature is not connected yet."
-		: "I don't have a camera reading yet.";
-	say(reply);
-	setTimeout(() => setHold(false), 1000 + reply.length * 80);
+// Answers from the scene at the moment the question was asked.
+// Code answers the known question types. The model only labels questions it doesn't recognize.
+async function answerQuestion(question) {
+	try {
+		const scene = buildSceneJson(lastDets, lastGround, lastAlertText);
+		console.log("question:", question);
+		let reply;
+		if (!scene) {
+			reply = "I don't have a camera reading yet.";
+		} else {
+			reply = await respond(
+				scene,
+				question,
+				isReady() ? interpretQuestion : null,
+			);
+		}
+		console.log("answer:", reply);
+		say(reply);
+		setTimeout(() => setHold(false), 1000 + reply.length * 80);
+	} catch (err) {
+		console.warn("answer failed:", err);
+		say("Sorry, I couldn't answer that.");
+		setTimeout(() => setHold(false), 2000);
+	}
 }
 
 const voice = createVoice({
@@ -260,4 +283,7 @@ button.addEventListener("click", () => (running ? stopApp() : startApp()));
 // The first tap (on the intro screen) starts voice listening.
 document.addEventListener("pointerdown", () => voice.listen(), { once: true });
 
-startIntro(() => voice.resume());
+// The answer model loads in the background after the intro, so it doesn't delay startup.
+startIntro(() => {
+	voice.resume();
+});

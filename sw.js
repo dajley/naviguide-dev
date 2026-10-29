@@ -3,14 +3,14 @@
 // Two caches:
 //   SHELL_CACHE  - app code (html, css, js, icons). Network first, so online
 //                  users always get the latest code; falls back to cache offline.
-//   ASSET_CACHE  - large immutable files (ONNX models, vendored ONNX Runtime).
+//   ASSET_CACHE  - large immutable files (ONNX models, vendored libraries).
 //                  Cache first. Only changes when ASSET_VERSION is bumped.
 //
 // When you change app files, bump SHELL_VERSION so the install step re-caches
-// the shell. When you change a model or the vendored runtime, bump ASSET_VERSION.
+// the shell. When you change a model or a vendored library, bump ASSET_VERSION.
 
-const SHELL_VERSION = "v2";
-const ASSET_VERSION = "v2";
+const SHELL_VERSION = "v3";
+const ASSET_VERSION = "v3";
 const SHELL_CACHE = `naviguide-shell-${SHELL_VERSION}`;
 const ASSET_CACHE = `naviguide-assets-${ASSET_VERSION}`;
 
@@ -36,6 +36,9 @@ const SHELL_FILES = [
 	"./js/worker.js",
 	"./js/worker-core.js",
 	"./js/voice.js",
+	"./js/answers.js",
+	"./js/llm.js",
+	"./js/llm-worker.js",
 	"./icons/naviguide-icon-192.png",
 	"./icons/naviguide-icon-512.png",
 ];
@@ -44,6 +47,7 @@ const ASSET_FILES = [
 	"./js/vendor/ort/ort.webgpu.min.js",
 	"./js/vendor/ort/ort-wasm-simd-threaded.jsep.mjs",
 	"./js/vendor/ort/ort-wasm-simd-threaded.jsep.wasm",
+	"./js/vendor/webllm/index.js",
 	"./models/yolo26n-seg.onnx",
 	"./models/yolo26n-depth.onnx",
 	"./models/yolo26n-sem-ade20k.onnx",
