@@ -7,7 +7,7 @@ import { setOverlay, startDisplay, stopDisplay } from "./overlay.js";
 import { updateGeometry } from "./geometry.js";
 import { startIntro } from "./intro.js";
 import { createVoice } from "./voice.js";
-import { loadAnswerModel, isReady, interpretQuestion } from "./llm.js";
+import { loadAnswerModel, isReady, interpretQuestion } from "./embed.js";
 import { respond } from "./answers.js";
 
 // Spoken as a safety message while the phone is held sideways.
@@ -16,6 +16,24 @@ const UPRIGHT_MSG = "Hold your phone upright.";
 const video = document.getElementById("camera");
 const button = document.getElementById("toggle");
 const status = document.getElementById("status");
+
+// Keeps the screen on while the app is open, so the phone doesn't pause the mic.
+let wakeLock = null;
+
+async function keepAwake() {
+	try {
+		if (!("wakeLock" in navigator) || wakeLock) return;
+		wakeLock = await navigator.wakeLock.request("screen");
+		wakeLock.addEventListener("release", () => (wakeLock = null));
+	} catch (err) {
+		console.warn("wake lock failed:", err);
+	}
+}
+
+// The browser releases the wake lock when the page is hidden, so get it back when the page is shown again.
+document.addEventListener("visibilitychange", () => {
+	if (document.visibilityState === "visible") keepAwake();
+});
 
 let running = false;
 let loopId = 0;
@@ -226,6 +244,7 @@ function stopApp() {
 	button.textContent = "Start";
 	status.textContent = "Camera off.";
 	cancelSpeech(); // Stop any navigation alert still being spoken.
+	resetAlerts(); // Drop any alert still waiting, so it can't speak after the stop.
 	// Give the browser a moment to clear the cancelled alert before speaking again.
 	setTimeout(() => say("Navigation stopped."), 400);
 }
@@ -256,6 +275,8 @@ async function answerQuestion(question) {
 	}
 }
 
+let introDone = false;
+let voiceReadyPending = false;
 const voice = createVoice({
 	onStart: startApp,
 	onStop: stopApp,
@@ -272,6 +293,10 @@ const voice = createVoice({
 		setTimeout(() => setHold(false), 2000);
 	},
 	onQuestion: answerQuestion,
+	onReady: () => {
+		if (introDone) say("Voice ready.");
+		else voiceReadyPending = true;
+	},
 	isRunning: () => running,
 });
 
@@ -281,9 +306,18 @@ setOnSpeak((text) => voice.noteSpeech(text));
 button.addEventListener("click", () => (running ? stopApp() : startApp()));
 
 // The first tap (on the intro screen) starts voice listening.
-document.addEventListener("pointerdown", () => voice.listen(), { once: true });
+document.addEventListener(
+	"pointerdown",
+	() => {
+		voice.listen();
+		keepAwake();
+	},
+	{ once: true },
+);
 
 // The answer model loads in the background after the intro, so it doesn't delay startup.
 startIntro(() => {
+	introDone = true;
 	voice.resume();
+	if (voiceReadyPending) say("Voice ready.");
 });

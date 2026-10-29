@@ -1,13 +1,13 @@
 // Answers scene questions in code, straight from the facts.
 // Step 1: the words are matched against the names the camera sees, the floor, and walls.
-// Step 2, only if nothing matches: the language model picks the closest name from the camera's list.
+// Step 2, only if nothing matches: a small embedding model picks the closest kind and name.
 // Code always writes the answer. The model never writes facts.
 export const OUT_OF_SCOPE = "I can only describe what is around you right now.";
 export const UNSURE = "I can't tell that from the camera.";
 export const HELP =
 	"You can ask how many, is there, where is, how far, what is close, what is around me, or what is the floor like.";
 
-const KINDS = new Set([
+const ALL_KINDS = new Set([
 	"route",
 	"nearest",
 	"list",
@@ -15,7 +15,12 @@ const KINDS = new Set([
 	"presence",
 	"where",
 	"distance",
+	"floor_under",
+	"floor_ahead",
+	"wall",
+	"other",
 ]);
+const TOPIC_KINDS = new Set(["count", "presence", "where", "distance"]);
 const ROUTE =
 	/\b(get to|go to|route|direction|directions|way to|path|navigate|take me|walk to|how do i|how can i|where should i)\b/;
 const WALL_Q = /\b(wall|walls|building|buildings)\b/;
@@ -135,18 +140,11 @@ function cleanTopic(raw) {
 	return SYNONYMS[w] ?? SYNONYMS[s] ?? s;
 }
 
-// Checks the model's label. Anything unexpected is thrown away.
+// Checks the model's match. Anything unexpected is thrown away.
 // A topic that isn't in the camera's list comes back with topic null, so the app says it can't tell.
 function checkIntent(raw, scene) {
-	if (!raw || typeof raw !== "object" || !KINDS.has(raw.kind)) return null;
-	if (
-		raw.kind !== "presence" &&
-		raw.kind !== "count" &&
-		raw.kind !== "where" &&
-		raw.kind !== "distance"
-	) {
-		return { kind: raw.kind, topic: null };
-	}
+	if (!raw || typeof raw !== "object" || !ALL_KINDS.has(raw.kind)) return null;
+	if (!TOPIC_KINDS.has(raw.kind)) return { kind: raw.kind, topic: null };
 	const topic = cleanTopic(raw.topic);
 	if (!topic || !namesOf(scene).includes(topic))
 		return { kind: raw.kind, topic: null };
@@ -313,26 +311,25 @@ function answerFor(parsed, scene) {
 	return presenceAnswer(topic, facts);
 }
 
-// Code first. If no pattern matches, the model picks a name from the camera's list.
-// "interpret" is the model's labeling function, or null when the model isn't loaded.
+// Code first. If no pattern matches, the embedding model picks the closest kind and name.
+// "interpret" is the matching function, or null when the model isn't loaded.
 export async function respond(scene, question, interpret) {
 	let parsed = parseQuestion(question, scene);
 	if (!parsed && interpret) {
 		const label = checkIntent(await interpret(question, namesOf(scene)), scene);
 		// Code decides count questions: a "how many" question is always a count.
 		const isCount = COUNT.test(question.toLowerCase());
-		const countable =
-			label &&
-			label.kind !== "route" &&
-			label.kind !== "nearest" &&
-			label.kind !== "list";
-		parsed = isCount && countable ? { ...label, kind: "count" } : label;
+		parsed =
+			isCount && label && TOPIC_KINDS.has(label.kind)
+				? { ...label, kind: "count" }
+				: label;
 	}
 	if (!parsed) return HELP;
 	const facts = scene.facts;
+	if (parsed.kind === "other") return UNSURE;
 	if (parsed.kind === "route") return OUT_OF_SCOPE;
 	if (parsed.kind === "wall")
-		return wallAnswer(parsed.sub, facts.wall_or_building ?? null);
+		return wallAnswer(parsed.sub ?? "presence", facts.wall_or_building ?? null);
 	if (parsed.kind === "floor_ahead")
 		return floorAheadAnswer(facts.ground ?? {});
 	if (parsed.kind === "floor_under")

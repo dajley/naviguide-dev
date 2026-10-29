@@ -9,8 +9,8 @@
 // When you change app files, bump SHELL_VERSION so the install step re-caches
 // the shell. When you change a model or a vendored library, bump ASSET_VERSION.
 
-const SHELL_VERSION = "v3";
-const ASSET_VERSION = "v3";
+const SHELL_VERSION = "v7";
+const ASSET_VERSION = "v5";
 const SHELL_CACHE = `naviguide-shell-${SHELL_VERSION}`;
 const ASSET_CACHE = `naviguide-assets-${ASSET_VERSION}`;
 
@@ -37,8 +37,7 @@ const SHELL_FILES = [
 	"./js/worker-core.js",
 	"./js/voice.js",
 	"./js/answers.js",
-	"./js/llm.js",
-	"./js/llm-worker.js",
+	"./js/embed.js",
 	"./icons/naviguide-icon-192.png",
 	"./icons/naviguide-icon-512.png",
 ];
@@ -47,7 +46,6 @@ const ASSET_FILES = [
 	"./js/vendor/ort/ort.webgpu.min.js",
 	"./js/vendor/ort/ort-wasm-simd-threaded.jsep.mjs",
 	"./js/vendor/ort/ort-wasm-simd-threaded.jsep.wasm",
-	"./js/vendor/webllm/index.js",
 	"./models/yolo26n-seg.onnx",
 	"./models/yolo26n-depth.onnx",
 	"./models/yolo26n-sem-ade20k.onnx",
@@ -55,8 +53,13 @@ const ASSET_FILES = [
 	"./js/vendor/moonshine/ort-wasm-simd-threaded.jsep.mjs",
 	"./js/vendor/moonshine/ort-wasm-simd-threaded.jsep.wasm",
 	"./js/vendor/moonshine/silero_vad_v5.onnx",
-	"./models/moonshine-base/quantized/decoder_model_merged.onnx",
-	"./models/moonshine-base/quantized/encoder_model.onnx",
+	"./js/vendor/moonshine/vad.worklet.bundle.min.js",
+	"./models/moonshine-tiny/quantized/decoder_model_merged.onnx",
+	"./models/moonshine-tiny/quantized/encoder_model.onnx",
+	"./models/all-MiniLM-L6-v2/config.json",
+	"./models/all-MiniLM-L6-v2/tokenizer.json",
+	"./models/all-MiniLM-L6-v2/tokenizer_config.json",
+	"./models/all-MiniLM-L6-v2/onnx/model_quantized.onnx",
 ];
 
 const ASSET_PATH = /\/(models|js\/vendor)\//;
