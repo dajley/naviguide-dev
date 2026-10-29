@@ -144,8 +144,8 @@ function drawLead(obj, box, g, w, h) {
 
 // Draws one screen frame of the overlay. The camera picture underneath is the live video.
 function drawOverlay(now) {
-	const w = video?.videoWidth ?? 0;
-	const h = video?.videoHeight ?? 0;
+	const w = video?.videoWidth || video?.naturalWidth || 0;
+	const h = video?.videoHeight || video?.naturalHeight || 0;
 	if (!w || !h) return;
 	if (canvas.width !== w || canvas.height !== h) {
 		canvas.width = w;

@@ -9,7 +9,7 @@
 // When you change app files, bump SHELL_VERSION so the install step re-caches
 // the shell. When you change a model or a vendored library, bump ASSET_VERSION.
 
-const SHELL_VERSION = "v9";
+const SHELL_VERSION = "v10";
 const ASSET_VERSION = "v8";
 const SHELL_CACHE = `naviguide-shell-${SHELL_VERSION}`;
 const ASSET_CACHE = `naviguide-assets-${ASSET_VERSION}`;
@@ -141,6 +141,8 @@ self.addEventListener("fetch", (event) => {
 
 	const url = new URL(request.url);
 	if (url.origin !== self.location.origin) return; // leave cross-origin alone
+
+	if (url.pathname === "/stream") return; // live camera feed: never cache it
 
 	if (ASSET_PATH.test(url.pathname)) {
 		event.respondWith(cacheFirst(request));

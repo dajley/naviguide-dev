@@ -1,4 +1,11 @@
-import { startCamera, stopCamera } from "./camera.js";
+import {
+	startCamera,
+	stopCamera,
+	startEsp32,
+	stopEsp32,
+	frameReady,
+	frameSize,
+} from "./camera.js";
 import { decide, markApproaching, resetNavigation } from "./navigation.js";
 import { unlockSpeech, say, setOnSpeak, cancelSpeech } from "./speech.js";
 import { handleAlert, resetAlerts, setHold } from "./alerts.js";
@@ -14,6 +21,14 @@ import { respond } from "./answers.js";
 const UPRIGHT_MSG = "Hold your phone upright.";
 
 const video = document.getElementById("camera");
+const esp32 = document.getElementById("esp32");
+// Use the ESP32 camera when the page is opened with ?camera=esp32.
+const useEsp32 = new URLSearchParams(location.search).get("camera") === "esp32";
+const frame = useEsp32 ? esp32 : video;
+if (useEsp32) {
+	video.hidden = true;
+	esp32.hidden = false;
+}
 const button = document.getElementById("toggle");
 const status = document.getElementById("status");
 
@@ -134,10 +149,9 @@ async function loadModelsInWorker() {
 async function inferOnce() {
 	busy = true;
 	try {
-		const vw = video.videoWidth;
-		const vh = video.videoHeight;
+		const { w: vw, h: vh } = frameSize(frame);
 		updateGeometry(vw, vh);
-		const bitmap = await createImageBitmap(video);
+		const bitmap = await createImageBitmap(frame);
 		const reset = needReset;
 		needReset = false;
 
@@ -153,7 +167,7 @@ async function inferOnce() {
 		prevMeters = markApproaching(dets, prevMeters);
 
 		let alert = decide(dets, lastGround, r.fresh);
-		if (isHorizontal()) {
+		if (!useEsp32 && isHorizontal()) {
 			// A safety message: it repeats every REMINDER_MS until the phone is upright again.
 			alert = {
 				...alert,
@@ -184,7 +198,7 @@ async function inferOnce() {
 // The id check stops an old loop if Stop and Start are pressed quickly.
 async function loop(id) {
 	while (running && id === loopId) {
-		if (video.readyState < 2 || busy) {
+		if (!frameReady(frame) || busy) {
 			await sleep(100);
 			continue;
 		}
@@ -206,8 +220,9 @@ async function startApp() {
 		lastSemMap = null;
 		needReset = true;
 		status.textContent = "Starting camera…";
-		await startCamera(video);
-		startDisplay(video);
+		if (useEsp32) startEsp32(esp32);
+		else await startCamera(video);
+		startDisplay(frame);
 		status.textContent = "Loading models…";
 		await loadModelsInWorker();
 		running = true;
@@ -239,7 +254,8 @@ function stopApp() {
 	}
 	running = false;
 	loopId++;
-	stopCamera(video);
+	if (useEsp32) stopEsp32(esp32);
+	else stopCamera(video);
 	stopDisplay();
 	button.textContent = "Start";
 	status.textContent = "Camera off.";

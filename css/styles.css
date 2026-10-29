@@ -30,7 +30,8 @@ main {
 	overflow: hidden;
 }
 
-#camera {
+#camera,
+#esp32 {
 	position: absolute;
 	inset: 0;
 	width: 100%;
