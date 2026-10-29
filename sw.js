@@ -9,8 +9,8 @@
 // When you change app files, bump SHELL_VERSION so the install step re-caches
 // the shell. When you change a model or a vendored library, bump ASSET_VERSION.
 
-const SHELL_VERSION = "v7";
-const ASSET_VERSION = "v5";
+const SHELL_VERSION = "v9";
+const ASSET_VERSION = "v8";
 const SHELL_CACHE = `naviguide-shell-${SHELL_VERSION}`;
 const ASSET_CACHE = `naviguide-assets-${ASSET_VERSION}`;
 
@@ -43,26 +43,30 @@ const SHELL_FILES = [
 ];
 
 const ASSET_FILES = [
-	"./js/vendor/ort/ort.webgpu.min.js",
-	"./js/vendor/ort/ort-wasm-simd-threaded.jsep.mjs",
-	"./js/vendor/ort/ort-wasm-simd-threaded.jsep.wasm",
-	"./models/yolo26n-seg.onnx",
-	"./models/yolo26n-depth.onnx",
-	"./models/yolo26n-sem-ade20k.onnx",
-	"./js/vendor/moonshine/moonshine.min.js",
-	"./js/vendor/moonshine/ort-wasm-simd-threaded.jsep.mjs",
-	"./js/vendor/moonshine/ort-wasm-simd-threaded.jsep.wasm",
-	"./js/vendor/moonshine/silero_vad_v5.onnx",
-	"./js/vendor/moonshine/vad.worklet.bundle.min.js",
+	"./vendor/yolo26n/ort.webgpu.min.js",
+	"./vendor/yolo26n/ort-wasm-simd-threaded.jsep.mjs",
+	"./vendor/yolo26n/ort-wasm-simd-threaded.jsep.wasm",
+	"./models/yolo26n/yolo26n-seg.onnx",
+	"./models/yolo26n/yolo26n-depth.onnx",
+	"./models/yolo26n/yolo26n-sem-ade20k.onnx",
+	"./vendor/moonshine-tiny/moonshine.min.js",
+	"./vendor/moonshine-tiny/ort-wasm-simd-threaded.jsep.mjs",
+	"./vendor/moonshine-tiny/ort-wasm-simd-threaded.jsep.wasm",
+	"./vendor/moonshine-tiny/silero_vad_v5.onnx",
+	"./vendor/moonshine-tiny/vad.worklet.bundle.min.js",
 	"./models/moonshine-tiny/quantized/decoder_model_merged.onnx",
 	"./models/moonshine-tiny/quantized/encoder_model.onnx",
-	"./models/all-MiniLM-L6-v2/config.json",
-	"./models/all-MiniLM-L6-v2/tokenizer.json",
-	"./models/all-MiniLM-L6-v2/tokenizer_config.json",
-	"./models/all-MiniLM-L6-v2/onnx/model_quantized.onnx",
+	"./vendor/minilm/transformers.web.min.js",
+	"./vendor/minilm/ort.wasm.min.mjs",
+	"./vendor/minilm/ort-wasm-simd-threaded.mjs",
+	"./vendor/minilm/ort-wasm-simd-threaded.wasm",
+	"./models/minilm/config.json",
+	"./models/minilm/tokenizer.json",
+	"./models/minilm/tokenizer_config.json",
+	"./models/minilm/onnx/model_quantized.onnx",
 ];
 
-const ASSET_PATH = /\/(models|js\/vendor)\//;
+const ASSET_PATH = /\/(models|vendor)\//;
 
 function absolute(path) {
 	return new URL(path, self.registration.scope).href;
