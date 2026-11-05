@@ -2,10 +2,13 @@
 // Step 1: the words are matched against the names the camera sees, the floor, and walls.
 // Step 2, only if nothing matches: a small embedding model picks the closest kind and name.
 // Code always writes the answer. The model never writes facts.
-export const OUT_OF_SCOPE = "I can only describe what is around you right now.";
+export const OUT_OF_SCOPE =
+	"I can't give directions. I can only tell you what I see in the camera and where it is.";
 export const UNSURE = "I can't tell that from the camera.";
+export const BEHIND = "I can't see behind you. The camera faces forward.";
+export const NOT_SEEN = "I don't see anything I can name.";
 export const HELP =
-	"You can ask how many, is there, where is, how far, what is close, what is around me, or what is the floor like.";
+	"You can ask what do you see, is there, how many, where is, how far, what is close or around me, what is farthest, what is on my left or right, what is ahead, is anyone close, what am I standing on, or what is the floor like.";
 
 const ALL_KINDS = new Set([
 	"route",
@@ -19,10 +22,29 @@ const ALL_KINDS = new Set([
 	"floor_ahead",
 	"wall",
 	"other",
+	"behind",
+	"someone",
+	"farthest",
+	"clear",
+	"side",
 ]);
-const TOPIC_KINDS = new Set(["count", "presence", "where", "distance"]);
+const TOPIC_KINDS = new Set([
+	"count",
+	"presence",
+	"where",
+	"distance",
+	"route",
+]);
+const WHERE = { left: "to your left", center: "ahead", right: "to your right" };
+const EXIT_WORDS = /\b(emergency exit|exit|exits|way out)\b/g;
 const ROUTE =
 	/\b(get to|go to|route|direction|directions|way to|path|navigate|take me|walk to|how do i|how can i|where should i)\b/;
+const BEHIND_Q = /\bbehind\b/;
+const SOMEONE_Q = /\b(someone|somebody|anyone|anybody)\b/;
+const FARTHEST_Q = /\b(farthest|furthest)\b/;
+const CLEAR_Q = /\b(clear|blocked|free|obstructed)\b/;
+const PATH_WORD = /\b(path|way)\b/;
+const SIDE_Q = /\b(?:on|to) my (left|right)\b|\bmy (left|right) side\b/;
 const WALL_Q = /\b(wall|walls|building|buildings)\b/;
 const GROUND_WORD = /\b(ground|floor|surface)\b/;
 const AHEAD_WORD = /\b(ahead|in front|forward)\b/;
@@ -92,10 +114,6 @@ function plural(label) {
 
 function article(label) {
 	return /^[aeiou]/.test(label) ? "an" : "a";
-}
-
-function cap(text) {
-	return text.charAt(0).toUpperCase() + text.slice(1);
 }
 
 function numberWord(n) {
@@ -178,7 +196,7 @@ function labelOf(topic) {
 	return topic === "door" ? "door" : topic === "stairs" ? "stairs" : topic;
 }
 
-// Doors and stairs always include the zone and distance, from the phrase.
+// Doors and stairs are regions, so they get yes or no with their position, not a count.
 function presenceAnswer(topic, facts) {
 	const places = placesFor(topic, facts);
 	if (topic === "stairs") {
@@ -219,30 +237,103 @@ function nearestAnswer(facts) {
 	return `The closest is ${article(n.name)} ${n.phrase}.`;
 }
 
-// Lists what the camera sees, nearest first, in one sentence.
-function listAnswer(facts) {
+// "2 meters" or "1 meter".
+function meters(m) {
+	return `${m} ${m === 1 ? "meter" : "meters"}`;
+}
+
+// "2 meters to your left", or "2 meters away" when the side is already said.
+function placeOf(zone, m, short = false) {
+	return short ? `${meters(m)} away` : `${meters(m)} ${WHERE[zone]}`;
+}
+
+// Builds one spoken item per name and zone. Same-name items in one zone are grouped,
+// so a crowd is one phrase. Doors and stairs stay as places, one per zone.
+function itemsFrom(scene, zone = null, short = false) {
+	const groups = new Map();
+	for (const d of scene.detections ?? []) {
+		if (zone && d.zone !== zone) continue;
+		const key = `${d.name}|${d.zone}`;
+		if (!groups.has(key)) groups.set(key, []);
+		groups.get(key).push(d);
+	}
 	const items = [];
-	for (const [name, info] of Object.entries(facts.objects_by_name)) {
-		if (!info.count || !info.places?.length) continue;
-		const p = info.places[0];
-		const text =
-			info.count === 1
-				? `${article(name)} ${name} ${p.phrase}`
-				: `${numberWord(info.count)} ${plural(name)} with the closest ${p.phrase}`;
-		items.push({ dist: p.distance_m, text });
+	for (const group of groups.values()) {
+		group.sort((a, b) => a.distance_m - b.distance_m);
+		const first = group[0];
+		let text;
+		if (group.length === 1) {
+			text = `${article(first.name)} ${first.name} ${placeOf(first.zone, first.distance_m, short)}`;
+		} else {
+			const where = short ? "" : ` ${WHERE[first.zone]}`;
+			text = `${numberWord(group.length)} ${plural(first.name)}${where}, the closest ${meters(first.distance_m)} away`;
+		}
+		items.push({ dist: first.distance_m, text });
 	}
-	if (facts.doors.places.length) {
-		const d = facts.doors.places[0];
-		items.push({ dist: d.distance_m, text: `a door ${d.phrase}` });
+	for (const d of scene.facts.doors?.places ?? []) {
+		if (zone && d.zone !== zone) continue;
+		items.push({
+			dist: d.distance_m,
+			text: `a door ${placeOf(d.zone, d.distance_m, short)}`,
+		});
 	}
-	if (facts.stairs.places.length) {
-		const s = facts.stairs.places[0];
-		items.push({ dist: s.distance_m, text: `stairs ${s.phrase}` });
+	for (const s of scene.facts.stairs?.places ?? []) {
+		if (zone && s.zone !== zone) continue;
+		items.push({
+			dist: s.distance_m,
+			text: `stairs ${placeOf(s.zone, s.distance_m, short)}`,
+		});
 	}
-	if (items.length === 0) return "I don't see anything I can name.";
+	return items;
+}
+
+// Speaks the nearest items first, up to the limit.
+function speakItems(items) {
 	items.sort((a, b) => a.dist - b.dist);
-	const shown = items.slice(0, LIST_LIMIT).map((i) => i.text);
-	return `I see ${joinList(shown)}.`;
+	return joinList(items.slice(0, LIST_LIMIT).map((i) => i.text));
+}
+
+function listAnswer(scene) {
+	const items = itemsFrom(scene);
+	if (items.length === 0) return NOT_SEEN;
+	return `I see ${speakItems(items)}.`;
+}
+
+// What is on one side, for "what is on my left" and "what is on my right".
+function sideAnswer(scene, zone) {
+	const side = zone === "left" ? "left" : "right";
+	const items = itemsFrom(scene, zone, true);
+	if (items.length === 0) return `I don't see anything on your ${side}.`;
+	return `On your ${side}, I see ${speakItems(items)}.`;
+}
+
+// What is straight ahead. It reports what it sees and never says the way is clear.
+function aheadAnswer(scene) {
+	const items = itemsFrom(scene, "center", true);
+	if (items.length === 0) return "I don't see anything ahead.";
+	return `Ahead, I see ${speakItems(items)}.`;
+}
+
+// The farthest thing the camera can name, using the same distances as the list.
+function farthestAnswer(scene) {
+	const all = scene.detections ?? [];
+	if (all.length === 0) return NOT_SEEN;
+	const far = all.reduce((a, b) => (b.distance_m > a.distance_m ? b : a));
+	return `The farthest is ${article(far.name)} ${far.name}, ${placeOf(far.zone, far.distance_m)}.`;
+}
+
+// The closest person, with where they are. Does not judge whether they count as close.
+function someoneAnswer(scene) {
+	const people = (scene.detections ?? []).filter((d) => d.name === "person");
+	if (people.length === 0) return "I don't see anyone.";
+	const p = people.reduce((a, b) => (b.distance_m < a.distance_m ? b : a));
+	return `The closest person is ${placeOf(p.zone, p.distance_m)}.`;
+}
+
+// A route question gets where the target is, if the camera sees it. It never gives steps.
+function routeAnswer(topic, facts) {
+	if (!topic) return OUT_OF_SCOPE;
+	return whereAnswer(topic, facts);
 }
 
 // Floor answers. Each one says what is missing when the camera has no reading.
@@ -272,9 +363,17 @@ function wallAnswer(sub, wall) {
 }
 
 // Matches the words against the camera's names. Returns { kind, topic }, or null if no pattern fits.
+// Exit words are read as "door" first, so "where is the exit" is a question about the door.
 export function parseQuestion(question, scene) {
-	const q = question.toLowerCase();
-	if (ROUTE.test(q)) return { kind: "route", topic: null };
+	const q = question.toLowerCase().replace(EXIT_WORDS, "door");
+	const topic = topicOf(q, scene);
+
+	if (BEHIND_Q.test(q) && !topic) return { kind: "behind", topic: null };
+	if (SOMEONE_Q.test(q)) return { kind: "someone", topic: null };
+	if (FARTHEST_Q.test(q)) return { kind: "farthest", topic: null };
+	if (CLEAR_Q.test(q) && (AHEAD_WORD.test(q) || PATH_WORD.test(q)))
+		return { kind: "clear", topic: null };
+	if (ROUTE.test(q)) return { kind: "route", topic };
 	if (WALL_Q.test(q)) {
 		const sub = DISTANCE.test(q)
 			? "distance"
@@ -286,8 +385,10 @@ export function parseQuestion(question, scene) {
 	if (GROUND_WORD.test(q) && AHEAD_WORD.test(q))
 		return { kind: "floor_ahead", topic: null };
 	if (UNDER_Q.test(q)) return { kind: "floor_under", topic: null };
-	const topic = topicOf(q, scene);
+
 	if (!topic) {
+		const side = q.match(SIDE_Q);
+		if (side) return { kind: "side", topic: null, zone: side[1] || side[2] };
 		if (NEAREST.test(q)) return { kind: "nearest", topic: null };
 		if (LIST.test(q)) return { kind: "list", topic: null };
 		return null;
@@ -326,8 +427,20 @@ export async function respond(scene, question, interpret) {
 	}
 	if (!parsed) return HELP;
 	const facts = scene.facts;
+	const q = question.toLowerCase();
+
 	if (parsed.kind === "other") return UNSURE;
-	if (parsed.kind === "route") return OUT_OF_SCOPE;
+	if (parsed.kind === "behind") return BEHIND;
+	if (parsed.kind === "someone") return someoneAnswer(scene);
+	if (parsed.kind === "farthest") return farthestAnswer(scene);
+	if (parsed.kind === "clear") return aheadAnswer(scene);
+	if (parsed.kind === "side") {
+		const zone =
+			parsed.zone ??
+			(/\bright\b/.test(q) ? "right" : /\bleft\b/.test(q) ? "left" : null);
+		return zone ? sideAnswer(scene, zone) : UNSURE;
+	}
+	if (parsed.kind === "route") return routeAnswer(parsed.topic, facts);
 	if (parsed.kind === "wall")
 		return wallAnswer(parsed.sub ?? "presence", facts.wall_or_building ?? null);
 	if (parsed.kind === "floor_ahead")
@@ -335,7 +448,7 @@ export async function respond(scene, question, interpret) {
 	if (parsed.kind === "floor_under")
 		return floorUnderAnswer(facts.ground ?? {});
 	if (parsed.kind === "nearest") return nearestAnswer(facts);
-	if (parsed.kind === "list") return listAnswer(facts);
+	if (parsed.kind === "list") return listAnswer(scene);
 	if (!parsed.topic) return UNSURE;
 	return answerFor(parsed, scene);
 }

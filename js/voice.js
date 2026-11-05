@@ -127,9 +127,6 @@ export function createVoice({
 		const list = words(text);
 		if (list.length === 0) return;
 
-		const startsNavi = list[0] === "navi";
-		const rest = startsNavi ? list.slice(1).join(" ") : "";
-
 		// Stop works even while the app is speaking. It needs "stop" and "navigation," in any order.
 		if (list.includes("stop") && list.includes("navigation")) {
 			onStop?.();
