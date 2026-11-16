@@ -1,5 +1,6 @@
 // Opening sequence: tap to continue, then three spoken screens (welcome, disclaimer, instructions).
 // Each screen is shown and spoken, then the next one starts. Listening opens after the last one.
+// The Skip button ends the sequence early and opens the main screen right away.
 
 const SCREENS = [
 	{
@@ -8,10 +9,10 @@ const SCREENS = [
 	},
 	{
 		title: "Disclaimer",
-		body: "NaViGuide is a student project. It is not an official navigation tool, it has not been tested or certified for safety, and it must not be relied on for real-life navigation. Instructions may lag by a few seconds.",
+		body: "NaViGuide is a student project. It is not an official navigation tool, it has not been tested or certified for safety, and it must not be relied on for real-life navigation. Alerts may lag by a few seconds.",
 	},
 	{
-		title: "Instructions",
+		title: " Voice Commands",
 		body: "To start, say: 'Navi, start navigation.' To stop, say: 'Navi, stop navigation.' To ask a question, say: 'Navi, I have a question,' then wait for 'Yes' before you ask the question.",
 	},
 ];
@@ -21,10 +22,14 @@ const FADE_MS = 600;
 
 const intro = document.getElementById("intro");
 const begin = document.getElementById("begin");
+const skip = document.getElementById("skip");
 const screen = document.getElementById("screen");
 const screenTitle = document.getElementById("screen-title");
 const screenText = document.getElementById("screen-text");
 const main = document.querySelector("main");
+
+let introEnded = false; // true once the intro has ended, either after the last screen or by Skip
+let onIntroDone = null;
 
 // Speaks text, then calls done. A timed wait backs it up in case the browser
 // never reports the end of the speech.
@@ -57,14 +62,24 @@ function openMain() {
 	}, FADE_MS);
 }
 
-// Shows one screen and speaks it, then moves on. After the last one, opens the main screen
-// and calls onDone so listening can start.
-function showScreen(i, onDone) {
+// Ends the intro once, whether the last screen finished or Skip was pressed.
+// Stops any speech still playing, opens the main screen, and lets listening start.
+function finishIntro() {
+	if (introEnded) return;
+	introEnded = true;
+	if ("speechSynthesis" in window) speechSynthesis.cancel();
+	begin.hidden = true;
+	skip.hidden = true;
+	screen.hidden = true;
+	openMain();
+	onIntroDone?.();
+}
+
+// Shows one screen and speaks it, then moves on. After the last one, ends the intro.
+function showScreen(i) {
+	if (introEnded) return;
 	if (i >= SCREENS.length) {
-		setTimeout(() => {
-			openMain();
-			onDone?.();
-		}, RESUME_DELAY_MS);
+		setTimeout(finishIntro, RESUME_DELAY_MS);
 		return;
 	}
 	const s = SCREENS[i];
@@ -72,18 +87,21 @@ function showScreen(i, onDone) {
 	screenText.textContent = s.body;
 	screen.hidden = false;
 	speak(`${s.title}. ${s.body}`, () =>
-		setTimeout(() => showScreen(i + 1, onDone), PAUSE_MS),
+		setTimeout(() => showScreen(i + 1), PAUSE_MS),
 	);
 }
 
 // The first tap anywhere on the opening screen starts the screens.
+// Skip ends the sequence at any point, including before the first tap.
 export function startIntro(onDone) {
+	onIntroDone = onDone;
 	begin.addEventListener(
 		"click",
 		() => {
 			begin.hidden = true;
-			showScreen(0, onDone);
+			showScreen(0);
 		},
 		{ once: true },
 	);
+	skip.addEventListener("click", finishIntro);
 }
