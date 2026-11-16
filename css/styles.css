@@ -145,6 +145,22 @@ main {
 	cursor: pointer;
 }
 
+/* Top-right corner, above the tap-anywhere layer. */
+.intro-skip {
+	position: absolute;
+	top: max(16px, env(safe-area-inset-top));
+	right: 16px;
+	z-index: 1;
+	padding: 8px 14px;
+	background: transparent;
+	color: #fff;
+	border: 1px solid #fff;
+	border-radius: 6px;
+	font: inherit;
+	font-size: 1rem;
+	cursor: pointer;
+}
+
 @media (prefers-reduced-motion: reduce) {
 	.intro-logo {
 		animation: none;
