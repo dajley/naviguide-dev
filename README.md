@@ -9,7 +9,7 @@ NaViGuide describes what is nearby in both indoor and outdoor environments. It d
 - **Finds and locates.** Three YOLO26n models detect obstacles, estimate their distance, and identify walkable ground and features that matter for moving safely, such as walls, doors, and stairs.
 - **Listens.** Moonshine tiny recognizes speech, so you can start and stop the app and ask questions by voice.
 
-> **Student project.** Student project. NaViGuide is a senior project. It is not an official navigation tool and should not be relied on as a mobility aid alone. It has been tested in Chrome on a laptop and an Android phone, but not yet with blind or low-vision users, and its distance thresholds are not calibrated.
+> **Student project.** NaViGuide is a senior project. It is not an official navigation tool and should not be relied on as a mobility aid alone. It has been tested in Chrome on a laptop and an Android phone, but not yet with blind or low-vision users, and its distance thresholds are not calibrated.
 
 **Live app:** https://dajley.github.io/naviguide-dev/
 
@@ -55,7 +55,9 @@ Draft paper: _NaViGuide: A Multi-Model Computer Vision-Based Assistive Navigatio
 
 ## Authors
 
-- Dajanique Leysath ([@dajley](https://github.com/dajley))
-- Nadia Ihsan Omer ([@nadia-io](https://github.com/nadia-io))
+- Dajanique Leysath
+  (Github: [@dajley](https://github.com/dajley) · LinkedIn: [Profile](https://www.linkedin.com/in/dajanique-leysath-873a84210/))
+- Nadia Ihsan Omer
+  (Github: [@nadia-io](https://github.com/nadia-io) · LinkedIn: [Profile](https://www.linkedin.com/in/nadia-ihsan-omer-6a067a228/))
 
 Senior Project, Computer Science, Fall 2026, South Carolina State University
