@@ -56,8 +56,8 @@ Draft paper: _NaViGuide: A Multi-Model Computer Vision-Based Assistive Navigatio
 ## Authors
 
 - Dajanique Leysath
-  (Github: [@dajley](https://github.com/dajley) · LinkedIn: [Profile](https://www.linkedin.com/in/dajanique-leysath-873a84210/))
+  (Github: [@dajley](https://github.com/dajley) | LinkedIn: [Profile](https://www.linkedin.com/in/dajanique-leysath-873a84210/))
 - Nadia Ihsan Omer
-  (Github: [@nadia-io](https://github.com/nadia-io) · LinkedIn: [Profile](https://www.linkedin.com/in/nadia-ihsan-omer-6a067a228/))
+  (Github: [@nadia-io](https://github.com/nadia-io) | LinkedIn: [Profile](https://www.linkedin.com/in/nadia-ihsan-omer-6a067a228/))
 
 Senior Project, Computer Science, Fall 2026, South Carolina State University
