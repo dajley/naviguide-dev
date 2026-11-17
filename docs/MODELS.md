@@ -35,7 +35,7 @@ NaViGuide runs these AI models in the browser. The model files are in `models/`,
 - **Purpose:** detects when someone is speaking, so the app knows when to listen.
 - **Source:** Silero team, loaded by the Moonshine library through `@ricky0123/vad-web`.
 
-## Question matching
+## Question Matching
 
 **all-MiniLM-L6-v2** (`models/minilm/`)
 
