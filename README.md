@@ -1,6 +1,6 @@
 # NaViGuide
 
-**NaViGuide** is a multi-model computer vision-based assistive navigation system for blind and low-vision people. It uses a smartphone's camera to tell you what is around you and whether the way ahead is clear, and it speaks its alerts aloud. You can also ask it spoken questions, such as "what is on my left?"
+**NaViGuide** is a multi-model computer vision-based assistive navigation system for blind and low-vision people. It uses a smartphone's camera to tell you what is around you and whether the way ahead is clear through spoken alerts. You can also ask it spoken questions, such as "what is on my left?"
 
 NaViGuide describes what is nearby in both indoor and outdoor environments. It does not give step-by-step route directions.
 
@@ -9,7 +9,7 @@ NaViGuide describes what is nearby in both indoor and outdoor environments. It d
 - **Finds and locates.** Three YOLO26n models detect obstacles, estimate their distance, and identify walkable ground and features that matter for moving safely, such as walls, doors, and stairs.
 - **Listens.** Moonshine tiny recognizes speech, so you can start and stop the app and ask questions by voice.
 
-> **Student project.** NaViGuide is a senior project. It is not an official navigation tool. It has been tested in Chrome on a laptop and an Android phone, but not yet with blind or low-vision users, and its distance thresholds are not calibrated. Don't rely on it for real navigation.
+> **Student project.** Student project. NaViGuide is a senior project. It is not an official navigation tool and should not be relied on as a mobility aid alone. It has been tested in Chrome on a laptop and an Android phone, but not yet with blind or low-vision users, and its distance thresholds are not calibrated.
 
 **Live app:** https://dajley.github.io/naviguide-dev/
 
