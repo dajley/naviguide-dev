@@ -1,3 +1,6 @@
+// Draws the on-screen overlay on top of the live camera video: colored ground areas, a box
+// around the object the current alert is about, and its label. For testers and sighted
+// helpers. Speech does not depend on it.
 import {
 	WALKABLE_IDS,
 	WARNING_IDS,

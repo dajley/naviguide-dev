@@ -1,3 +1,7 @@
+// Reads distances from the depth map. depthAt() returns the distance at the bottom-center
+// of an object's box, where it meets the ground. depthRange() checks the map's value range.
+// Used by worker-core.js.
+
 const SIZE = 640;
 
 // Min and max over the whole depth map, to check the value range.

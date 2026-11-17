@@ -1,3 +1,6 @@
+// App entry point, loaded by index.html. Connects the camera, the model worker, navigation,
+// alerts, speech, the overlay, and voice commands. Handles the Start/Stop button and the
+// question flow.
 import { startCamera, stopCamera } from "./camera.js";
 import { decide, markApproaching, resetNavigation } from "./navigation.js";
 import { unlockSpeech, say, setOnSpeak, cancelSpeech } from "./speech.js";

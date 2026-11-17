@@ -1,3 +1,6 @@
+// Spoken output. Uses the browser's text-to-speech, prefers an English voice on the device
+// (so it works offline), plays one message at a time without cutting sentences off, and
+// tells alerts.js when speech is free for the next message.
 const supported = "speechSynthesis" in window;
 let voice = null;
 let busy = false;

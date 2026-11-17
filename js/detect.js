@@ -1,3 +1,6 @@
+// Turns the segmentation model's raw output into a list of detected objects, each with a
+// label, a zone (left, center, or right), and a box. Also removes duplicate boxes.
+// Used by worker-core.js.
 import { MOVING_CLASSES } from "./config.js";
 import { zoneOfX } from "./geometry.js";
 

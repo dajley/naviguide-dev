@@ -1,3 +1,6 @@
+// Decides which spoken navigation message plays next. Keeps only the newest message,
+// waits for a short gap after speech, skips repeats of the same subject, and pauses
+// while a question is being answered. Called from main.js.
 import { speakText, setOnFree, cancelSpeech } from "./speech.js";
 import { confirmSpoken } from "./navigation.js";
 import { REMINDER_MS, INFO_GAP_MS } from "./config.js";

@@ -1,3 +1,7 @@
+// Maps the camera picture onto the 640x640 square the models use (letterboxed, with gray
+// padding), and splits the real picture into left, center, and right zones.
+// Used by the model code, the ground reader, the detector, and the overlay.
+
 // Size of the square the models see.
 export const MODEL = 640;
 

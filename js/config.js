@@ -1,3 +1,6 @@
+// Central settings for NaViGuide: which object classes count as moving, the class IDs for
+// ground and structures, distance and alert thresholds, and timing. Change values here to tune behavior.
+
 // Classes treated as moving obstacles. Their names are announced.
 // Any other class is a general obstacle, announced without a name.
 export const MOVING_CLASSES = new Set([

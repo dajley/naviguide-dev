@@ -1,3 +1,6 @@
+// Reads the semantic model's output (ADE20K classes): the floor under you, the surface ahead,
+// walls and buildings, doors, stairs, and the walkable side zones. Also works out distances
+// for these from the depth map. Used by worker-core.js and navigation.js.
 import {
 	WALKABLE_IDS,
 	WARNING_IDS,

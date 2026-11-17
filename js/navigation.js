@@ -1,3 +1,6 @@
+// Decides what to say each cycle, from the detections and the ground readings: the nearest
+// blocking object, stairs, doors, walls and buildings, surface changes, and a direction
+// (keep straight, move left or right, or stop). Uses the thresholds in config.js.
 import { zoneRanges } from "./geometry.js";
 import {
 	CLOSE_M,

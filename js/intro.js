@@ -12,7 +12,7 @@ const SCREENS = [
 		body: "NaViGuide is a student project. It is not an official navigation tool, it has not been tested or certified for safety, and it must not be relied on for real-life navigation. Alerts may lag by a few seconds.",
 	},
 	{
-		title: " Voice Commands",
+		title: "Voice Commands",
 		body: "To start, say: 'Navi, start navigation.' To stop, say: 'Navi, stop navigation.' To ask a question, say: 'Navi, I have a question,' then wait for 'Yes' before you ask the question.",
 	},
 ];
