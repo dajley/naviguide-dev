@@ -1,4 +1,4 @@
-# How NaViGuide works
+# How NaViGuide Works
 
 1. **`index.html`** loads the page and starts `js/main.js`, which runs the app.
 2. **`js/camera.js`** gets frames from the camera. Each frame goes to a background worker (`js/worker.js`, `js/worker-core.js`).

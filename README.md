@@ -13,7 +13,7 @@ NaViGuide describes what is nearby in both indoor and outdoor environments. It d
 
 **Live app:** https://dajley.github.io/naviguide-dev/
 
-## Run it locally
+## Run It Locally
 
 1. Clone the repo:
    ```bash
@@ -28,7 +28,7 @@ NaViGuide describes what is nearby in both indoor and outdoor environments. It d
 
 Opening `index.html` directly won't work. The app needs a web server or HTTPS.
 
-## Using the app
+## Using the App
 
 - To start, say **"Navi, start navigation"** or press **Start**. To stop, say **"Navi, stop navigation"** or press **Stop**.
 - To ask a question, say **"Navi, I have a question,"** wait for "Yes," then ask.
@@ -39,7 +39,7 @@ Opening `index.html` directly won't work. The app needs a web server or HTTPS.
 - [docs/OVERVIEW.md](docs/OVERVIEW.md): how the app works
 - [docs/MODELS.md](docs/MODELS.md): the AI models and what each one does
 
-## Project files
+## Project Files
 
 - `index.html`: the page
 - `css/`: styles
