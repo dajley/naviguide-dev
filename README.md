@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="icons/naviguide-icon-512.png" alt="NaViGuide logo" width="160">
+</p>
+
 # NaViGuide
 
 **NaViGuide** is a multi-model computer vision-based assistive navigation system for blind and low-vision people. It uses a smartphone's camera to tell you what is around you and whether the way ahead is clear through spoken alerts. You can also ask it spoken questions, such as "what is on my left?"
@@ -11,14 +15,24 @@ NaViGuide describes what is nearby in both indoor and outdoor environments. It d
 
 > **Student project.** NaViGuide is a senior project. It is not an official navigation tool and should not be relied on as a mobility aid alone. It has been tested in Chrome on a laptop and an Android phone, but not yet with blind or low-vision users, and its distance thresholds are not calibrated.
 
-**Live app:** https://dajley.github.io/naviguide-dev/
+**Live app:** https://dajley.github.io/naviguide/
+
+## Screenshots
+
+<p align="center">
+  <img src="docs/images/naviguide-screenshot-1.png" alt="NaViGuide camera view with an alert" width="70%">
+</p>
+
+<p align="center">
+  <img src="docs/images/naviguide-screenshot-2.png" alt="NaViGuide camera view with a ground overlay" width="70%">
+</p>
 
 ## Run It Locally
 
 1. Clone the repo:
    ```bash
-   git clone https://github.com/dajley/naviguide-dev.git
-   cd naviguide-dev
+   git clone https://github.com/dajley/naviguide.git
+   cd naviguide
    ```
 2. Start a local web server in the project folder:
    ```bash
@@ -46,6 +60,7 @@ Opening `index.html` directly won't work. The app needs a web server or HTTPS.
 - `js/`: the app code
 - `models/`, `vendor/`: AI models and third-party libraries
 - `icons/`: app icons
+- `docs/images/`: screenshots for this README
 - `sw.js`: offline support
 - `manifest.webmanifest`: app install settings
 
